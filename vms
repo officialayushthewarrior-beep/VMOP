@@ -1,0 +1,145 @@
+#!/bin/bash
+set -euo pipefail
+
+# ─────────────────────────────────────────────────────────────
+#  AYUSHTHEWARRIOR VM MANAGEMENT
+# ─────────────────────────────────────────────────────────────
+
+# Colors
+RESET='\033[0m'
+BOLD='\033[1m'
+DIM='\033[2m'
+
+BRED='\033[0;91m'
+BGREEN='\033[0;92m'
+BYELLOW='\033[0;93m'
+BBLUE='\033[0;94m'
+BPURPLE='\033[0;95m'
+BCYAN='\033[0;96m'
+BWHITE='\033[0;97m'
+
+# ─────────────────────────────────────────────────────────────
+
+display_header() {
+    clear
+    echo -e "${BOLD}${BCYAN}"
+    cat << "EOF"
+       __     ___    _  _____ _    _ _______ _    _ ________          __     _____  _____  _____ ____  _____  
+     /\\ \   / / |  | |/ ____| |  | |__   __| |  | |  ____\ \        / /\   |  __ \|  __ \|_   _/ __ \|  __ \ 
+    /  \\ \_/ /| |  | | (___ | |__| |  | |  | |__| | |__   \ \  /\  / /  \  | |__) | |__) | | || |  | | |__) |
+   / /\ \\   / | |  | |\___ \|  __  |  | |  |  __  |  __|   \ \/  \/ / /\ \ |  _  /|  _  /  | || |  | |  _  / 
+  / ____ \| |  | |__| |____) | |  | |  | |  | |  | | |____   \  /\  / ____ \| | \ \| | \ \ _| || |__| | | \ \ 
+ /_/    \_\_|   \____/|_____/|_|  |_|  |_|  |_|  |_|______|   \/  \/_/    \_\_|  \_\_|  \_\_____\____/|_|  \_\
+                                                                                                              
+                                                                                                              
+EOF
+    echo -e "${RESET}"
+    echo -e "${BOLD}${BPURPLE}          ╔════════════════════════════════════════════╗${RESET}"
+    echo -e "${BOLD}${BPURPLE}          ║${RESET}   ${BOLD}${BWHITE}AYUSHTHEWARRIOR VM MANAGEMENT${RESET}   ${BOLD}${BPURPLE}║${RESET}"
+    echo -e "${BOLD}${BPURPLE}          ╚════════════════════════════════════════════╝${RESET}"
+    echo -e "${DIM}                      Powered by AYUSHTHEWARRIOR${RESET}"
+    echo
+}
+
+print_status() {
+    local type=$1
+    local message=$2
+    local prefix color
+
+    case $type in
+        "INFO")    prefix="[◆ INFO]";    color="${BBLUE}" ;;
+        "WARN")    prefix="[⚠ WARN]";    color="${BYELLOW}" ;;
+        "ERROR")   prefix="[✖ ERROR]";   color="${BRED}" ;;
+        "SUCCESS") prefix="[✔ SUCCESS]"; color="${BGREEN}" ;;
+        "INPUT")   prefix="[➤ INPUT]";   color="${BCYAN}" ;;
+        "SYSTEM")  prefix="[⚙ SYSTEM]";  color="${BPURPLE}" ;;
+        "RUN")     prefix="[▶ RUN]";     color="${BGREEN}" ;;
+        *)         prefix="[$type]";     color="${BWHITE}" ;;
+    esac
+
+    echo -e "${BOLD}${color}${prefix}${RESET} ${message}"
+}
+
+print_box() {
+    local title="$1"
+    local width=${2:-50}
+    echo -e "${BOLD}${BPURPLE}┌$(printf '─%.0s' $(seq 1 $width))┐${RESET}"
+    printf "${BOLD}${BPURPLE}│${RESET} ${BOLD}${BWHITE}%-*s${RESET}${BOLD}${BPURPLE}│${RESET}\n" $((width-2)) "$title"
+    echo -e "${BOLD}${BPURPLE}└$(printf '─%.0s' $(seq 1 $width))┘${RESET}"
+}
+
+# ─────────────────────────────────────────────────────────────
+
+launch_kvm() {
+    print_status "SYSTEM" "Launching ${BOLD}KVM${RESET} mode..."
+    echo
+    bash <(curl -fsSL https://raw.githubusercontent.com/officialayushthewarrior-beep/VMOP/refs/heads/main/vm.sh)
+}
+
+launch_non_kvm() {
+    print_status "SYSTEM" "Launching ${BOLD}NON-KVM${RESET} mode..."
+    echo
+    bash <(curl -fsSL https://raw.githubusercontent.com/officialayushthewarrior-beep/VMOP/refs/heads/main/NOKVM)
+}
+
+# ─────────────────────────────────────────────────────────────
+
+main_menu() {
+    while true; do
+        display_header
+
+        print_box "MAIN MENU"
+        echo -e "  ${BOLD}${BGREEN}1)${RESET}  Create a new VM"
+        echo -e "  ${BOLD}${BWHITE}0)${RESET}  Exit"
+        echo
+
+        read -p "$(print_status "INPUT" "Enter your choice: ")" choice
+
+        case $choice in
+            1)
+                echo
+                print_box "SELECT VIRTUALIZATION MODE"
+                echo -e "  ${BOLD}${BGREEN}1)${RESET}  KVM          ${DIM}(Hardware Acceleration)${RESET}"
+                echo -e "  ${BOLD}${BYELLOW}2)${RESET}  NON-KVM      ${DIM}(Software Emulation)${RESET}"
+                echo -e "  ${BOLD}${BWHITE}0)${RESET}  Back"
+                echo
+
+                read -p "$(print_status "INPUT" "Select mode: ")" mode
+
+                case $mode in
+                    1)
+                        launch_kvm
+                        ;;
+                    2)
+                        launch_non_kvm
+                        ;;
+                    0)
+                        continue
+                        ;;
+                    *)
+                        print_status "ERROR" "Invalid selection"
+                        sleep 1
+                        ;;
+                esac
+                ;;
+            0)
+                echo
+                print_status "SYSTEM" "Shutting down..."
+                echo -e "${BOLD}${BPURPLE}          See you later, warrior.${RESET}"
+                echo
+                exit 0
+                ;;
+            *)
+                print_status "ERROR" "Invalid option"
+                sleep 1
+                ;;
+        esac
+
+        echo
+        read -p "$(print_status "INPUT" "Press Enter to return to menu...")"
+    done
+}
+
+# ─────────────────────────────────────────────────────────────
+
+main_menu
