@@ -1,11 +1,11 @@
 #!/bin/bash
-set -euo pipefail
 
 # ─────────────────────────────────────────────────────────────
 #  AYUSHTHEWARRIOR · MAIN MENU
 # ─────────────────────────────────────────────────────────────
 
-# Colors
+set +e
+
 R='\033[0m'
 B='\033[1m'
 D='\033[2m'
@@ -18,6 +18,31 @@ MAG='\033[38;5;201m'
 WHT='\033[38;5;255m'
 GRY='\033[38;5;245m'
 BLU='\033[38;5;39m'
+
+trap 'echo -e "\n  ${B}${YEL}⚠${R} Interrupted. Returning to menu..."; sleep 0.7' SIGINT
+
+# ─────────────────────────────────────────────────────────────
+#  ANIMATIONS
+# ─────────────────────────────────────────────────────────────
+
+spinner() {
+    local msg="$1"
+    local duration=${2:-2}          # only whole numbers
+    local frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+    local i=0
+    local end=$((SECONDS + duration))
+
+    tput civis 2>/dev/null || true
+    while [ $SECONDS -lt $end ]; do
+        printf "\r  ${B}${MAG}${frames[i]}${R}  ${msg}   "
+        i=$(( (i + 1) % 10 ))
+        sleep 0.1
+    done
+    printf "\r  ${B}${GRN}✔${R}  ${msg}          \n"
+    tput cnorm 2>/dev/null || true
+}
+
+# ─────────────────────────────────────────────────────────────
 
 header() {
     clear
@@ -52,72 +77,92 @@ status() {
         WARN)  echo -e "  ${B}${YEL}⚠${R} ${m}" ;;
         ERR)   echo -e "  ${B}${RED}✖${R} ${m}" ;;
         RUN)   echo -e "  ${B}${MAG}▶${R} ${m}" ;;
-        IN)    echo -e "  ${B}${CYN}➤${R} ${m}" ;;
         *)     echo -e "  ${m}" ;;
     esac
 }
 
 # ─────────────────────────────────────────────────────────────
+#  ACTIONS
+# ─────────────────────────────────────────────────────────────
 
 install_rdp() {
-    status RUN "Installing RDP (xrdp)..."
+    spinner "Preparing RDP installation..." 2
     echo
-    sudo apt update -y
-    sudo apt install -y xrdp
-    sudo systemctl enable --now xrdp
+    status RUN "Installing RDP (xrdp)..."
+    sudo apt update -y >/dev/null 2>&1
+    sudo apt install -y xrdp >/dev/null 2>&1
+    sudo systemctl enable --now xrdp >/dev/null 2>&1
     echo
     status OK "RDP is ready — connect on port 3389"
 }
 
 install_vscode() {
-    status RUN "Installing Visual Studio Code..."
+    spinner "Preparing VS Code installation..." 2
     echo
-    sudo apt update -y
-    sudo apt install -y wget gpg
-    wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+    status RUN "Installing Visual Studio Code..."
+    sudo apt update -y >/dev/null 2>&1
+    sudo apt install -y wget gpg >/dev/null 2>&1
+    wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg 2>/dev/null
     sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
     echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | \
         sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
     rm -f packages.microsoft.gpg
-    sudo apt update -y
-    sudo apt install -y code
+    sudo apt update -y >/dev/null 2>&1
+    sudo apt install -y code >/dev/null 2>&1
     echo
     status OK "VS Code installed"
 }
 
 run_vm() {
-    status RUN "Opening VM Creation..."
+    spinner "Loading VM Creation module..." 2
     echo
+    status RUN "Opening VM Creation..."
     bash <(curl -fsSL https://raw.githubusercontent.com/officialayushthewarrior-beep/VMOP/refs/heads/main/vms)
 }
 
 run_vps() {
-    status RUN "Opening VPS Panel..."
+    spinner "Loading VPS Panel..." 2
     echo
+    status RUN "Opening VPS Panel..."
     bash <(curl -fsSL https://raw.githubusercontent.com/officialayushthewarrior-beep/VMOP/refs/heads/main/vps)
 }
 
 run_settings() {
-    status RUN "Opening Settings..."
+    spinner "Loading Settings..." 2
     echo
+    status RUN "Opening Settings..."
     bash <(curl -fsSL https://raw.githubusercontent.com/officialayushthewarrior-beep/VMOP/refs/heads/main/settings)
 }
 
 # ─────────────────────────────────────────────────────────────
 
 main() {
+    clear
+    echo
+    spinner "Booting AYUSHTHEWARRIOR system..." 3
+    sleep 0.4
+
     while true; do
         header
 
         echo -e "  ${B}${WHT}┌─ SELECT OPTION ─────────────────────────────────────────────┐${R}"
+        sleep 0.08
         echo -e "  ${B}${WHT}│${R}                                                             ${B}${WHT}│${R}"
+        sleep 0.06
         echo -e "  ${B}${WHT}│${R}   ${B}${GRN}[1]${R}  RDP Installation                                   ${B}${WHT}│${R}"
+        sleep 0.06
         echo -e "  ${B}${WHT}│${R}   ${B}${CYN}[2]${R}  VS Code Installation                               ${B}${WHT}│${R}"
+        sleep 0.06
         echo -e "  ${B}${WHT}│${R}   ${B}${YEL}[3]${R}  VM Creation                                        ${B}${WHT}│${R}"
+        sleep 0.06
         echo -e "  ${B}${WHT}│${R}   ${B}${MAG}[4]${R}  VPS Panel                                          ${B}${WHT}│${R}"
+        sleep 0.06
         echo -e "  ${B}${WHT}│${R}   ${B}${RED}[5]${R}  Settings                                           ${B}${WHT}│${R}"
+        sleep 0.06
         echo -e "  ${B}${WHT}│${R}   ${B}${GRY}[0]${R}  Exit                                               ${B}${WHT}│${R}"
+        sleep 0.06
         echo -e "  ${B}${WHT}│${R}                                                             ${B}${WHT}│${R}"
+        sleep 0.06
         echo -e "  ${B}${WHT}└─────────────────────────────────────────────────────────────┘${R}"
         echo
 
@@ -139,7 +184,7 @@ main() {
             *)
                 echo
                 status ERR "Invalid option"
-                sleep 1
+                sleep 0.9
                 continue
                 ;;
         esac
