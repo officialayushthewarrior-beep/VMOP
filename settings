@@ -1,9 +1,11 @@
 #!/bin/bash
-set -euo pipefail
 
 # ─────────────────────────────────────────────────────────────
 #  AYUSHTHEWARRIOR SETTINGS
 # ─────────────────────────────────────────────────────────────
+
+# Disable automatic exit on error + handle Ctrl+C properly
+set +e
 
 RESET='\033[0m'
 BOLD='\033[1m'
@@ -17,14 +19,8 @@ BPURPLE='\033[0;95m'
 BCYAN='\033[0;96m'
 BWHITE='\033[0;97m'
 
-# Handle Ctrl+C gracefully
-trap ctrl_c INT
-
-ctrl_c() {
-    echo
-    print_status "WARN" "Interrupted by user. Returning to menu..."
-    sleep 1
-}
+# Strong Ctrl+C handler
+trap 'echo -e "\n${BOLD}${BYELLOW}[⚠ WARN]${RESET} Interrupted. Returning to menu..."; sleep 0.8' SIGINT
 
 display_header() {
     clear
@@ -163,27 +159,16 @@ main_menu() {
         echo -e "  ${BOLD}${BWHITE}0)${RESET}  Exit"
         echo
 
-        read -p "$(print_status "INPUT" "Enter your choice: ")" choice || true
+        echo -ne "$(print_status "INPUT" "Enter your choice: ")"
+        read -r choice
 
         case $choice in
-            1)
-                install_tailscale
-                ;;
-            2)
-                install_sshx
-                ;;
-            3)
-                install_cloudflare
-                ;;
-            4)
-                run_vps_detection
-                ;;
-            5)
-                run_ssh_fixer
-                ;;
-            6)
-                run_lxc_lxd
-                ;;
+            1) install_tailscale ;;
+            2) install_sshx ;;
+            3) install_cloudflare ;;
+            4) run_vps_detection ;;
+            5) run_ssh_fixer ;;
+            6) run_lxc_lxd ;;
             0)
                 echo
                 print_status "SYSTEM" "Shutting down..."
@@ -198,7 +183,8 @@ main_menu() {
         esac
 
         echo
-        read -p "$(print_status "INPUT" "Press Enter to return to menu...")" || true
+        echo -ne "$(print_status "INPUT" "Press Enter to return to menu...")"
+        read -r
     done
 }
 
