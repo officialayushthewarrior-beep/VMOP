@@ -1,0 +1,144 @@
+#!/bin/bash
+set -euo pipefail
+
+# ─────────────────────────────────────────────────────────────
+#  AYUSHTHEWARRIOR MACHINE PANEL
+# ─────────────────────────────────────────────────────────────
+
+RESET='\033[0m'
+BOLD='\033[1m'
+DIM='\033[2m'
+
+BRED='\033[0;91m'
+BGREEN='\033[0;92m'
+BYELLOW='\033[0;93m'
+BBLUE='\033[0;94m'
+BPURPLE='\033[0;95m'
+BCYAN='\033[0;96m'
+BWHITE='\033[0;97m'
+
+display_header() {
+    clear
+    echo -e "${BOLD}${BCYAN}"
+    cat << "EOF"
+     █████╗ ██╗   ██╗██╗   ██╗███████╗██╗  ██╗
+    ██╔══██╗╚██╗ ██╔╝██║   ██║██╔════╝██║  ██║
+    ███████║ ╚████╔╝ ██║   ██║███████╗███████║
+    ██╔══██║  ╚██╔╝  ██║   ██║╚════██║██╔══██║
+    ██║  ██║   ██║   ╚██████╔╝███████║██║  ██║
+    ╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚══════╝╚═╝  ╚═╝
+EOF
+    echo -e "${RESET}"
+    echo -e "${BOLD}${BPURPLE}          ╔════════════════════════════════════════════╗${RESET}"
+    echo -e "${BOLD}${BPURPLE}          ║${RESET}     ${BOLD}${BWHITE}AYUSHTHEWARRIOR MACHINE PANEL${RESET}     ${BOLD}${BPURPLE}║${RESET}"
+    echo -e "${BOLD}${BPURPLE}          ╚════════════════════════════════════════════╝${RESET}"
+    echo -e "${DIM}                      Powered by AYUSHTHEWARRIOR${RESET}"
+    echo
+}
+
+print_status() {
+    local type=$1
+    local message=$2
+    local prefix color
+
+    case $type in
+        "INFO")    prefix="[◆ INFO]";    color="${BBLUE}" ;;
+        "WARN")    prefix="[⚠ WARN]";    color="${BYELLOW}" ;;
+        "ERROR")   prefix="[✖ ERROR]";   color="${BRED}" ;;
+        "SUCCESS") prefix="[✔ SUCCESS]"; color="${BGREEN}" ;;
+        "INPUT")   prefix="[➤ INPUT]";   color="${BCYAN}" ;;
+        "SYSTEM")  prefix="[⚙ SYSTEM]";  color="${BPURPLE}" ;;
+        "RUN")     prefix="[▶ RUN]";     color="${BGREEN}" ;;
+        *)         prefix="[$type]";     color="${BWHITE}" ;;
+    esac
+
+    echo -e "${BOLD}${color}${prefix}${RESET} ${message}"
+}
+
+print_box() {
+    local title="$1"
+    local width=${2:-52}
+    echo -e "${BOLD}${BPURPLE}┌$(printf '─%.0s' $(seq 1 $width))┐${RESET}"
+    printf "${BOLD}${BPURPLE}│${RESET} ${BOLD}${BWHITE}%-*s${RESET}${BOLD}${BPURPLE}│${RESET}\n" $((width-2)) "$title"
+    echo -e "${BOLD}${BPURPLE}└$(printf '─%.0s' $(seq 1 $width))┘${RESET}"
+}
+
+# ─────────────────────────────────────────────────────────────
+#  ACTIONS
+# ─────────────────────────────────────────────────────────────
+
+install_vortex() {
+    print_status "WARN" "VORTEXPANEL is ${BOLD}Coming Soon${RESET}"
+    sleep 1.5
+}
+
+install_avm_v2() {
+    print_status "SYSTEM" "Launching ${BOLD}AVM V2${RESET}..."
+    echo
+    bash <(curl -fsSL https://bit.ly/avmpanelv2op-ayushthewarrior)
+}
+
+install_avm_v3() {
+    print_status "SYSTEM" "Launching ${BOLD}AVM V3${RESET}..."
+    echo
+    bash <(curl -fsSL https://bit.ly/avmpanelv3)
+}
+
+install_hvm() {
+    print_status "SYSTEM" "Launching ${BOLD}HVM V5.1${RESET}..."
+    echo
+    bash <(curl -fsSL https://raw.githubusercontent.com/officialayushthewarrior-beep/HVM5.1/refs/heads/main/hvm-installater.sh)
+}
+
+# ─────────────────────────────────────────────────────────────
+#  MAIN MENU
+# ─────────────────────────────────────────────────────────────
+
+main_menu() {
+    while true; do
+        display_header
+
+        print_box "MACHINE PANEL"
+        echo -e "  ${BOLD}${BPURPLE}1)${RESET}  VORTEXPANEL          ${DIM}(Coming Soon)${RESET}"
+        echo -e "  ${BOLD}${BGREEN}2)${RESET}  AVM V2"
+        echo -e "  ${BOLD}${BCYAN}3)${RESET}  AVM V3"
+        echo -e "  ${BOLD}${BYELLOW}4)${RESET}  HVM V5.1"
+        echo -e "  ${BOLD}${BWHITE}0)${RESET}  Exit"
+        echo
+
+        read -p "$(print_status "INPUT" "Enter your choice: ")" choice
+
+        case $choice in
+            1)
+                install_vortex
+                ;;
+            2)
+                install_avm_v2
+                ;;
+            3)
+                install_avm_v3
+                ;;
+            4)
+                install_hvm
+                ;;
+            0)
+                echo
+                print_status "SYSTEM" "Shutting down..."
+                echo -e "${BOLD}${BPURPLE}          See you later, warrior.${RESET}"
+                echo
+                exit 0
+                ;;
+            *)
+                print_status "ERROR" "Invalid option"
+                sleep 1
+                ;;
+        esac
+
+        echo
+        read -p "$(print_status "INPUT" "Press Enter to return to menu...")"
+    done
+}
+
+# ─────────────────────────────────────────────────────────────
+
+main_menu
